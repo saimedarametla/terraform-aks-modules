@@ -1,0 +1,45 @@
+name: Terraform Validate
+
+on:
+  pull_request:
+    paths:
+      - '**.tf'
+      - '**.tfvars'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7"
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive
+
+      - name: Validate aks-cluster module
+        working-directory: modules/aks-cluster
+        run: |
+          terraform init -backend=false
+          terraform validate
+
+      - name: Validate node-pool module
+        working-directory: modules/node-pool
+        run: |
+          terraform init -backend=false
+          terraform validate
+
+      - name: Validate networking module
+        working-directory: modules/networking
+        run: |
+          terraform init -backend=false
+          terraform validate
+
+      - name: Validate keyvault-integration module
+        working-directory: modules/keyvault-integration
+        run: |
+          terraform init -backend=false
+          terraform validate
