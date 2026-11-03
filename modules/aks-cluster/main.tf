@@ -12,6 +12,7 @@ resource "azurerm_kubernetes_cluster" "this" {
   # Deliberate Checkov skips (see "Security notes" in the README):
   #checkov:skip=CKV_AZURE_115:Private cluster is opt-in via private_cluster_enabled
   #checkov:skip=CKV_AZURE_6:Authorized IP ranges are opt-in via api_server_authorized_ip_ranges (not supported on private clusters)
+  #checkov:skip=CKV_AZURE_170:Standard is the module default; the production example uses Free for non-prod to save cost
   #checkov:skip=CKV_AZURE_171:Upgrade channel is opt-in via automatic_channel_upgrade; upgrades are otherwise managed by your pipeline
   #checkov:skip=CKV_AZURE_117:Disk encryption sets need a customer-managed key, which is out of scope for this module
   #checkov:skip=CKV_AZURE_227:Host encryption needs the EncryptionAtHost subscription feature registered
