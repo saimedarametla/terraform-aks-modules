@@ -1,4 +1,27 @@
-mock_provider "azurerm" {}
+mock_provider "azurerm" {
+  # Computed blocks come back empty from a mock provider, but the module's outputs read them.
+  mock_resource "azurerm_kubernetes_cluster" {
+    defaults = {
+      kubelet_identity = [
+        {
+          client_id                 = "22222222-2222-2222-2222-222222222222"
+          object_id                 = "33333333-3333-3333-3333-333333333333"
+          user_assigned_identity_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-test/providers/Microsoft.ManagedIdentity/userAssignedIdentities/kubelet"
+        }
+      ]
+      kube_config = [
+        {
+          host                   = "https://aks-test.example.com:443"
+          username               = "test-user"
+          password               = "test-password"
+          client_certificate     = "test-cert"
+          client_key             = "test-key"
+          cluster_ca_certificate = "test-ca"
+        }
+      ]
+    }
+  }
+}
 
 variables {
   cluster_name        = "aks-test"
@@ -7,7 +30,7 @@ variables {
 }
 
 run "secure_defaults" {
-  command = plan
+  command = apply
 
   assert {
     condition     = azurerm_kubernetes_cluster.this.local_account_disabled == true
@@ -36,7 +59,7 @@ run "secure_defaults" {
 }
 
 run "system_pool_runs_only_critical_addons" {
-  command = plan
+  command = apply
 
   assert {
     condition     = azurerm_kubernetes_cluster.this.default_node_pool[0].only_critical_addons_enabled == true
@@ -50,7 +73,7 @@ run "system_pool_runs_only_critical_addons" {
 }
 
 run "private_cluster_is_opt_in" {
-  command = plan
+  command = apply
 
   variables {
     private_cluster_enabled = true
@@ -63,7 +86,7 @@ run "private_cluster_is_opt_in" {
 }
 
 run "monitoring_only_with_a_workspace" {
-  command = plan
+  command = apply
 
   assert {
     condition     = length(azurerm_kubernetes_cluster.this.oms_agent) == 0
@@ -72,7 +95,7 @@ run "monitoring_only_with_a_workspace" {
 }
 
 run "monitoring_enabled_with_a_workspace" {
-  command = plan
+  command = apply
 
   variables {
     log_analytics_workspace_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-test/providers/Microsoft.OperationalInsights/workspaces/law-test"
@@ -85,7 +108,7 @@ run "monitoring_enabled_with_a_workspace" {
 }
 
 run "api_ip_allow_list_is_optional" {
-  command = plan
+  command = apply
 
   variables {
     api_server_authorized_ip_ranges = ["203.0.113.0/24"]
@@ -98,7 +121,7 @@ run "api_ip_allow_list_is_optional" {
 }
 
 run "rejects_unknown_sku_tier" {
-  command = plan
+  command = apply
 
   variables {
     sku_tier = "Premium"
@@ -108,7 +131,7 @@ run "rejects_unknown_sku_tier" {
 }
 
 run "rejects_unknown_upgrade_channel" {
-  command = plan
+  command = apply
 
   variables {
     automatic_channel_upgrade = "weekly"

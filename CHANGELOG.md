@@ -4,6 +4,10 @@ All notable changes are documented here. The format follows [Keep a Changelog](h
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-11-03
+
+This release changes secure defaults, so existing users should read the **Changed** section before upgrading.
+
 ### Added
 - `aks-cluster`: `sku_tier` (default `Standard`), `automatic_channel_upgrade` and `api_server_authorized_ip_ranges` options
 - `keyvault-integration`: `allowed_subnet_ids` and `allowed_ip_ranges`
@@ -13,8 +17,9 @@ All notable changes are documented here. The format follows [Keep a Changelog](h
 - Dependabot, issue and pull request templates, pre-commit config, release workflow
 
 ### Changed
-- `aks-cluster`: Azure Policy add-on enabled and local Kubernetes admin accounts disabled
-- `keyvault-integration`: network ACLs now deny by default
+- **Breaking:** `aks-cluster` disables local Kubernetes admin accounts (Azure AD only) and enables the Azure Policy add-on
+- **Breaking:** `aks-cluster` `sku_tier` defaults to `Standard` (paid uptime SLA); set `Free` for dev
+- **Breaking:** `keyvault-integration` network ACLs deny by default; pass `allowed_subnet_ids` or `allowed_ip_ranges`
 - `networking`: AKS subnet gets the `Microsoft.KeyVault` service endpoint
 - Deliberate Checkov skips are recorded next to each resource with the reason
 
