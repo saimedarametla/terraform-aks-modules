@@ -30,6 +30,18 @@ variable "secret_permissions" {
   default     = ["Get", "List"]
 }
 
+variable "allowed_subnet_ids" {
+  description = "Subnets allowed to reach the vault. They need the Microsoft.KeyVault service endpoint (the networking module adds it). Include the AKS subnet or the CSI driver cannot read secrets."
+  type        = list(string)
+  default     = []
+}
+
+variable "allowed_ip_ranges" {
+  description = "Public IPs or CIDR ranges allowed to reach the vault, for example a build agent that writes secrets."
+  type        = list(string)
+  default     = []
+}
+
 variable "tags" {
   description = "Tags to apply to all resources"
   type        = map(string)

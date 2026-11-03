@@ -48,6 +48,32 @@ variable "default_node_pool" {
   }
 }
 
+variable "sku_tier" {
+  description = "AKS control plane tier. Standard adds the uptime SLA and is recommended for production; Free is fine for dev."
+  type        = string
+  default     = "Standard"
+  validation {
+    condition     = contains(["Free", "Standard"], var.sku_tier)
+    error_message = "sku_tier must be Free or Standard."
+  }
+}
+
+variable "automatic_channel_upgrade" {
+  description = "Automatic upgrade channel: patch, rapid, stable or node-image. Null leaves upgrades to your own pipeline. With patch, set kubernetes_version to a minor version such as 1.30."
+  type        = string
+  default     = null
+  validation {
+    condition     = var.automatic_channel_upgrade == null || contains(["patch", "rapid", "stable", "node-image"], coalesce(var.automatic_channel_upgrade, "none"))
+    error_message = "automatic_channel_upgrade must be null, patch, rapid, stable or node-image."
+  }
+}
+
+variable "api_server_authorized_ip_ranges" {
+  description = "CIDR ranges allowed to reach the public API server. Empty means unrestricted. Not supported together with private_cluster_enabled."
+  type        = list(string)
+  default     = []
+}
+
 variable "log_analytics_workspace_id" {
   description = "Log Analytics workspace ID for Container Insights. Null disables the OMS agent."
   type        = string

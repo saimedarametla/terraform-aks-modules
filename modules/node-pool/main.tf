@@ -9,6 +9,8 @@ terraform {
 }
 
 resource "azurerm_kubernetes_cluster_node_pool" "this" {
+  #checkov:skip=CKV_AZURE_227:Host encryption needs the EncryptionAtHost subscription feature registered
+  #checkov:skip=CKV_AZURE_168:Azure CNI reserves one IP per pod, so 50+ pods per node needs a larger subnet than the default /24
   name                  = var.node_pool_name
   kubernetes_cluster_id = var.kubernetes_cluster_id
   vm_size               = var.vm_size

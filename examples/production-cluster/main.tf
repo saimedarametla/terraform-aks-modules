@@ -49,6 +49,7 @@ module "aks_cluster" {
   resource_group_name = var.resource_group_name
   kubernetes_version  = var.kubernetes_version
   subnet_id           = module.networking.aks_subnet_id
+  sku_tier            = var.environment == "prod" ? "Standard" : "Free"
 
   default_node_pool = {
     vm_size            = var.system_node_vm_size
@@ -83,5 +84,6 @@ module "keyvault" {
   resource_group_name = var.resource_group_name
   tenant_id           = var.tenant_id
   kubelet_identity_id = module.aks_cluster.kubelet_identity_object_id
+  allowed_subnet_ids  = [module.networking.aks_subnet_id]
   tags                = local.common_tags
 }
