@@ -50,13 +50,13 @@ flowchart LR
 
 ```hcl
 module "networking" {
-  source              = "github.com/saimedarametla/terraform-aks-modules//modules/networking?ref=v1.0.0"
+  source              = "github.com/saimedarametla/terraform-aks-modules//modules/networking?ref=v2.0.0"
   cluster_name        = "aks-prod-001"
   resource_group_name = "rg-aks-prod"
 }
 
 module "aks_cluster" {
-  source              = "github.com/saimedarametla/terraform-aks-modules//modules/aks-cluster?ref=v1.0.0"
+  source              = "github.com/saimedarametla/terraform-aks-modules//modules/aks-cluster?ref=v2.0.0"
   cluster_name        = "aks-prod-001"
   resource_group_name = "rg-aks-prod"
   subnet_id           = module.networking.aks_subnet_id
@@ -67,7 +67,7 @@ module "aks_cluster" {
 }
 
 module "app_pool" {
-  source                = "github.com/saimedarametla/terraform-aks-modules//modules/node-pool?ref=v1.0.0"
+  source                = "github.com/saimedarametla/terraform-aks-modules//modules/node-pool?ref=v2.0.0"
   node_pool_name        = "apppool"
   kubernetes_cluster_id = module.aks_cluster.cluster_id
   subnet_id             = module.networking.aks_subnet_id
