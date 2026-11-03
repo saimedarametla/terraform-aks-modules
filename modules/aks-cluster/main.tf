@@ -9,13 +9,25 @@ terraform {
 }
 
 resource "azurerm_kubernetes_cluster" "this" {
+  # Deliberate Checkov skips (see "Security notes" in the README):
+  #checkov:skip=CKV_AZURE_115:Private cluster is opt-in via private_cluster_enabled
+  #checkov:skip=CKV_AZURE_6:Authorized IP ranges are opt-in via api_server_authorized_ip_ranges (not supported on private clusters)
+  #checkov:skip=CKV_AZURE_171:Upgrade channel is opt-in via automatic_channel_upgrade; upgrades are otherwise managed by your pipeline
+  #checkov:skip=CKV_AZURE_117:Disk encryption sets need a customer-managed key, which is out of scope for this module
+  #checkov:skip=CKV_AZURE_227:Host encryption needs the EncryptionAtHost subscription feature registered
+  #checkov:skip=CKV_AZURE_226:Ephemeral OS disks depend on the VM SKU cache size, so they are not forced on the system pool
+  #checkov:skip=CKV_AZURE_168:Azure CNI reserves one IP per pod, so 50+ pods per node needs a larger subnet than the default /24
   name                = var.cluster_name
   location            = var.location
   resource_group_name = var.resource_group_name
   dns_prefix          = var.cluster_name
   kubernetes_version  = var.kubernetes_version
 
-  private_cluster_enabled = var.private_cluster_enabled
+  private_cluster_enabled   = var.private_cluster_enabled
+  sku_tier                  = var.sku_tier
+  azure_policy_enabled      = true
+  local_account_disabled    = true
+  automatic_channel_upgrade = var.automatic_channel_upgrade
 
   default_node_pool {
     name                         = "system"
@@ -54,6 +66,13 @@ resource "azurerm_kubernetes_cluster" "this" {
   key_vault_secrets_provider {
     secret_rotation_enabled  = true
     secret_rotation_interval = "2m"
+  }
+
+  dynamic "api_server_access_profile" {
+    for_each = length(var.api_server_authorized_ip_ranges) > 0 ? [1] : []
+    content {
+      authorized_ip_ranges = var.api_server_authorized_ip_ranges
+    }
   }
 
   dynamic "oms_agent" {
