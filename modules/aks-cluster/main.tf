@@ -24,7 +24,7 @@ resource "azurerm_kubernetes_cluster" "this" {
     min_count                    = var.default_node_pool.min_count
     max_count                    = var.default_node_pool.max_count
     enable_auto_scaling          = true
-    availability_zones           = var.default_node_pool.availability_zones
+    zones                        = var.default_node_pool.availability_zones
     vnet_subnet_id               = var.subnet_id
     only_critical_addons_enabled = true # system pool runs only system pods
 
