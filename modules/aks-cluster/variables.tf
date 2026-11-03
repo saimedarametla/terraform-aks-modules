@@ -15,9 +15,9 @@ variable "resource_group_name" {
 }
 
 variable "kubernetes_version" {
-  description = "Kubernetes version — check az aks get-versions for available versions"
+  description = "Kubernetes version (check az aks get-versions). Null lets AKS pick its current default; later changes are ignored and handled via your upgrade process."
   type        = string
-  default     = "1.29"
+  default     = null
 }
 
 variable "subnet_id" {
@@ -49,7 +49,7 @@ variable "default_node_pool" {
 }
 
 variable "log_analytics_workspace_id" {
-  description = "Log Analytics workspace ID for OMS agent (monitoring)"
+  description = "Log Analytics workspace ID for Container Insights. Null disables the OMS agent."
   type        = string
   default     = null
 }
