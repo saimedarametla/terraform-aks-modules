@@ -1,3 +1,13 @@
+terraform {
+  required_version = ">= 1.3"
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~> 3.100"
+    }
+  }
+}
+
 resource "azurerm_virtual_network" "this" {
   name                = "vnet-${var.cluster_name}"
   location            = var.location
@@ -37,6 +47,3 @@ resource "azurerm_subnet_network_security_group_association" "aks" {
   subnet_id                 = azurerm_subnet.aks.id
   network_security_group_id = azurerm_network_security_group.aks.id
 }
-
-output "vnet_id"      { value = azurerm_virtual_network.this.id }
-output "aks_subnet_id" { value = azurerm_subnet.aks.id }

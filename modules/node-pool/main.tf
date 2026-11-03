@@ -1,3 +1,13 @@
+terraform {
+  required_version = ">= 1.3"
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~> 3.100"
+    }
+  }
+}
+
 resource "azurerm_kubernetes_cluster_node_pool" "this" {
   name                  = var.node_pool_name
   kubernetes_cluster_id = var.kubernetes_cluster_id
@@ -12,11 +22,11 @@ resource "azurerm_kubernetes_cluster_node_pool" "this" {
   availability_zones = var.availability_zones
   vnet_subnet_id     = var.subnet_id
 
-  node_taints  = var.node_taints
-  node_labels  = var.node_labels
+  node_taints = var.node_taints
+  node_labels = var.node_labels
 
   os_disk_size_gb = var.os_disk_size_gb
-  os_disk_type    = "Ephemeral"   # faster, cheaper for stateless workloads
+  os_disk_type    = "Ephemeral" # faster, cheaper for stateless workloads
 
   upgrade_settings {
     max_surge = "33%"
@@ -25,6 +35,6 @@ resource "azurerm_kubernetes_cluster_node_pool" "this" {
   tags = var.tags
 
   lifecycle {
-    ignore_changes = [node_count]  # managed by cluster autoscaler
+    ignore_changes = [node_count] # managed by cluster autoscaler
   }
 }

@@ -54,9 +54,9 @@ variable "node_labels" {
 }
 
 variable "os_disk_size_gb" {
-  description = "OS disk size in GB"
+  description = "OS disk size in GB. Ephemeral OS disks must fit in the VM SKU's cache (about 100 GB for Standard_D4s_v3), so keep this at or below that."
   type        = number
-  default     = 128
+  default     = 64
 }
 
 variable "tags" {

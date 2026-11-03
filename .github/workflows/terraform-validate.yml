@@ -1,45 +1,69 @@
-name: Terraform Validate
+name: Terraform CI
 
 on:
+  push:
+    branches: [main]
   pull_request:
     paths:
       - '**.tf'
       - '**.tfvars'
+      - '.github/workflows/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
-  validate:
+  fmt:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: "1.7"
-
-      - name: Terraform Format Check
+          terraform_version: "1.7.5"
+      - name: Terraform fmt
         run: terraform fmt -check -recursive
 
-      - name: Validate aks-cluster module
-        working-directory: modules/aks-cluster
+  validate:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dir:
+          - modules/networking
+          - modules/aks-cluster
+          - modules/node-pool
+          - modules/keyvault-integration
+          - examples/production-cluster
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.5"
+      - name: Init and validate
+        working-directory: ${{ matrix.dir }}
         run: |
           terraform init -backend=false
           terraform validate
 
-      - name: Validate node-pool module
-        working-directory: modules/node-pool
-        run: |
-          terraform init -backend=false
-          terraform validate
+  tflint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: terraform-linters/setup-tflint@v4
+      - name: Init TFLint
+        run: tflint --init
+      - name: Run TFLint
+        run: tflint --recursive
 
-      - name: Validate networking module
-        working-directory: modules/networking
-        run: |
-          terraform init -backend=false
-          terraform validate
-
-      - name: Validate keyvault-integration module
-        working-directory: modules/keyvault-integration
-        run: |
-          terraform init -backend=false
-          terraform validate
+  checkov:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Checkov
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: .
+          framework: terraform
+          # Report findings without failing the build; tighten once triaged.
+          soft_fail: true

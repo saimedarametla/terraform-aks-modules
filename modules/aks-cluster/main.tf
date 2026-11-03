@@ -2,7 +2,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = ">= 3.50"
+      version = "~> 3.100"
     }
   }
   required_version = ">= 1.3"
@@ -18,15 +18,15 @@ resource "azurerm_kubernetes_cluster" "this" {
   private_cluster_enabled = var.private_cluster_enabled
 
   default_node_pool {
-    name                 = "system"
-    vm_size              = var.default_node_pool.vm_size
-    node_count           = var.default_node_pool.node_count
-    min_count            = var.default_node_pool.min_count
-    max_count            = var.default_node_pool.max_count
-    enable_auto_scaling  = true
-    availability_zones   = lookup(var.default_node_pool, "availability_zones", ["1", "2", "3"])
-    vnet_subnet_id       = var.subnet_id
-    only_critical_addons_enabled = true  # system pool runs only system pods
+    name                         = "system"
+    vm_size                      = var.default_node_pool.vm_size
+    node_count                   = var.default_node_pool.node_count
+    min_count                    = var.default_node_pool.min_count
+    max_count                    = var.default_node_pool.max_count
+    enable_auto_scaling          = true
+    availability_zones           = var.default_node_pool.availability_zones
+    vnet_subnet_id               = var.subnet_id
+    only_critical_addons_enabled = true # system pool runs only system pods
 
     upgrade_settings {
       max_surge = "33%"
@@ -56,8 +56,11 @@ resource "azurerm_kubernetes_cluster" "this" {
     secret_rotation_interval = "2m"
   }
 
-  oms_agent {
-    log_analytics_workspace_id = var.log_analytics_workspace_id
+  dynamic "oms_agent" {
+    for_each = var.log_analytics_workspace_id != null ? [1] : []
+    content {
+      log_analytics_workspace_id = var.log_analytics_workspace_id
+    }
   }
 
   maintenance_window {
@@ -71,8 +74,8 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   lifecycle {
     ignore_changes = [
-      default_node_pool[0].node_count,  # managed by autoscaler
-      kubernetes_version,               # managed via upgrade pipeline
+      default_node_pool[0].node_count, # managed by autoscaler
+      kubernetes_version,              # managed via upgrade pipeline
     ]
   }
 }
