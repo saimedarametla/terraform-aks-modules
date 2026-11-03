@@ -16,13 +16,13 @@ output "kube_config" {
 
 output "kube_config_host" {
   description = "AKS API server endpoint"
-  value       = azurerm_kubernetes_cluster.this.kube_config[0].host
+  value       = try(azurerm_kubernetes_cluster.this.kube_config[0].host, null)
   sensitive   = true
 }
 
 output "kubelet_identity_object_id" {
   description = "Object ID of the kubelet managed identity — used for Key Vault access policies"
-  value       = azurerm_kubernetes_cluster.this.kubelet_identity[0].object_id
+  value       = try(azurerm_kubernetes_cluster.this.kubelet_identity[0].object_id, null)
 }
 
 output "cluster_identity_principal_id" {
