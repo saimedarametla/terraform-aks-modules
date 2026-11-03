@@ -121,7 +121,7 @@ run "api_ip_allow_list_is_optional" {
 }
 
 run "rejects_unknown_sku_tier" {
-  command = apply
+  command = plan
 
   variables {
     sku_tier = "Premium"
@@ -131,7 +131,7 @@ run "rejects_unknown_sku_tier" {
 }
 
 run "rejects_unknown_upgrade_channel" {
-  command = apply
+  command = plan
 
   variables {
     automatic_channel_upgrade = "weekly"
