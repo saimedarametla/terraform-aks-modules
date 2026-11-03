@@ -7,6 +7,9 @@ on:
     paths:
       - '**.tf'
       - '**.tfvars'
+      - '**.tftest.hcl'
+      - '**.md'
+      - '.terraform-docs.yml'
       - '.github/workflows/**'
   workflow_dispatch:
 
@@ -34,6 +37,7 @@ jobs:
           - modules/aks-cluster
           - modules/node-pool
           - modules/keyvault-integration
+          - examples/minimal
           - examples/production-cluster
     steps:
       - uses: actions/checkout@v4
@@ -46,6 +50,27 @@ jobs:
           terraform init -backend=false
           terraform validate
 
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dir:
+          - modules/networking
+          - modules/aks-cluster
+          - modules/node-pool
+          - modules/keyvault-integration
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.5"
+      - name: Init and test
+        working-directory: ${{ matrix.dir }}
+        run: |
+          terraform init -backend=false
+          terraform test
+
   tflint:
     runs-on: ubuntu-latest
     steps:
@@ -56,6 +81,20 @@ jobs:
       - name: Run TFLint
         run: tflint --recursive
 
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install terraform-docs
+        run: |
+          curl -sSLo td.tgz https://github.com/terraform-docs/terraform-docs/releases/download/v0.19.0/terraform-docs-v0.19.0-linux-amd64.tar.gz
+          tar -xzf td.tgz terraform-docs
+          sudo mv terraform-docs /usr/local/bin/
+      - name: Check generated module docs are up to date
+        run: |
+          for d in modules/*; do terraform-docs --config "$PWD/.terraform-docs.yml" "$d"; done
+          git diff --exit-code -- modules
+
   checkov:
     runs-on: ubuntu-latest
     steps:
@@ -65,5 +104,5 @@ jobs:
         with:
           directory: .
           framework: terraform
-          # Report findings without failing the build; tighten once triaged.
-          soft_fail: true
+          # Every skip is recorded next to its resource with the reason (see README "Security notes").
+          soft_fail: false

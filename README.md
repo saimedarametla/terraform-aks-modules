@@ -43,7 +43,8 @@ flowchart LR
 - Key Vault locked down with network ACLs (default deny) and a service endpoint for the AKS subnet
 - Optional API server IP allow-list and automatic upgrade channel
 - Maintenance window (Sunday 01:00-04:00)
-- CI runs `terraform fmt`, `terraform validate`, `tflint` and `checkov` on every module
+- CI on every push and pull request: `fmt`, `validate` (modules and examples), `terraform test`, `tflint`, `checkov` and a check that the generated docs are current
+- Automated tests for every module, using a mock provider so they run without Azure credentials
 
 ## Usage
 
@@ -75,7 +76,12 @@ module "app_pool" {
 }
 ```
 
-A full multi-environment example (dev/uat/prod sizing) is in [`examples/production-cluster`](examples/production-cluster):
+| Example | What it shows |
+|---|---|
+| [`examples/minimal`](examples/minimal) | A VNet and a cluster, nothing else |
+| [`examples/production-cluster`](examples/production-cluster) | Full stack with dev, uat and prod sizing, a user node pool and Key Vault |
+
+To try the full example:
 
 ```bash
 cd examples/production-cluster
@@ -92,7 +98,7 @@ terraform plan -var-file=dev.tfvars
 
 ## Inputs and outputs
 
-Full tables live in each module's `variables.tf` and `outputs.tf`. Key ones:
+Complete, generated tables are in each module's README ([`networking`](modules/networking/README.md), [`aks-cluster`](modules/aks-cluster/README.md), [`node-pool`](modules/node-pool/README.md), [`keyvault-integration`](modules/keyvault-integration/README.md)). The key ones:
 
 **aks-cluster:** `cluster_name`, `resource_group_name`, `subnet_id` (required); `location`, `kubernetes_version`, `sku_tier` (default `Standard`), `private_cluster_enabled`, `api_server_authorized_ip_ranges`, `automatic_channel_upgrade`, `default_node_pool`, `log_analytics_workspace_id`, `tags` (optional).
 Outputs: `cluster_id`, `cluster_name`, `kube_config` (sensitive), `kubelet_identity_object_id`, `cluster_identity_principal_id`, `node_resource_group`.
@@ -103,12 +109,22 @@ Outputs: `cluster_id`, `cluster_name`, `kube_config` (sensitive), `kubelet_ident
 
 **keyvault-integration:** `cluster_name`, `resource_group_name`, `tenant_id`, `kubelet_identity_id` (required); `allowed_subnet_ids`, `allowed_ip_ranges` (the vault denies all other network access). Outputs: `key_vault_id`, `key_vault_uri`.
 
+## Development
+
+```bash
+pre-commit install            # fmt, validate, tflint and docs on every commit
+terraform test                # run inside a module directory, no Azure login needed
+```
+
+Tests use a mock provider, so they check module logic (defaults, validation rules, security settings) without creating any resources.
+
 ## Security notes
 
-CI runs Checkov on every push. These findings are skipped on purpose, with the reason recorded next to the resource:
+CI runs Checkov on every push and fails the build on any unexplained finding. These checks are skipped on purpose, with the reason recorded next to the resource:
 
 | Check | Why it is skipped |
 |---|---|
+| Standard SKU check | `Standard` is the module default; the example uses `Free` for non-prod to save cost |
 | Private cluster, API server IP ranges, upgrade channel | Opt-in through variables, so each team chooses its own access and upgrade model |
 | 50+ pods per node | Azure CNI reserves one IP per pod, so this needs a bigger subnet than the default /24 |
 | Host encryption | Needs the `EncryptionAtHost` feature registered on the subscription |
