@@ -2,10 +2,10 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.100"
+      version = "~> 5.13"
     }
   }
-  required_version = ">= 1.3"
+  required_version = ">= 1.7"
 }
 
 resource "azurerm_kubernetes_cluster" "this" {
@@ -13,7 +13,7 @@ resource "azurerm_kubernetes_cluster" "this" {
   #checkov:skip=CKV_AZURE_115:Private cluster is opt-in via private_cluster_enabled
   #checkov:skip=CKV_AZURE_6:Authorized IP ranges are opt-in via api_server_authorized_ip_ranges (not supported on private clusters)
   #checkov:skip=CKV_AZURE_170:Standard is the module default; the production example uses Free for non-prod to save cost
-  #checkov:skip=CKV_AZURE_171:Upgrade channel is opt-in via automatic_channel_upgrade; upgrades are otherwise managed by your pipeline
+  #checkov:skip=CKV_AZURE_171:Upgrade channel is opt-in via automatic_upgrade_channel; upgrades are otherwise managed by your pipeline
   #checkov:skip=CKV_AZURE_117:Disk encryption sets need a customer-managed key, which is out of scope for this module
   #checkov:skip=CKV_AZURE_227:Host encryption needs the EncryptionAtHost subscription feature registered
   #checkov:skip=CKV_AZURE_226:Ephemeral OS disks depend on the VM SKU cache size, so they are not forced on the system pool
@@ -28,7 +28,7 @@ resource "azurerm_kubernetes_cluster" "this" {
   sku_tier                  = var.sku_tier
   azure_policy_enabled      = true
   local_account_disabled    = true
-  automatic_channel_upgrade = var.automatic_channel_upgrade
+  automatic_upgrade_channel = var.automatic_upgrade_channel
 
   default_node_pool {
     name                         = "system"
@@ -36,7 +36,7 @@ resource "azurerm_kubernetes_cluster" "this" {
     node_count                   = var.default_node_pool.node_count
     min_count                    = var.default_node_pool.min_count
     max_count                    = var.default_node_pool.max_count
-    enable_auto_scaling          = true
+    auto_scaling_enabled         = true
     zones                        = var.default_node_pool.availability_zones
     vnet_subnet_id               = var.subnet_id
     only_critical_addons_enabled = true # system pool runs only system pods
@@ -50,6 +50,10 @@ resource "azurerm_kubernetes_cluster" "this" {
     type = "SystemAssigned"
   }
 
+  node_provisioning_profile {
+    mode = "Manual" # node pools are defined explicitly in Terraform
+  }
+
   network_profile {
     network_plugin    = "azure"
     network_policy    = "azure"
@@ -60,8 +64,9 @@ resource "azurerm_kubernetes_cluster" "this" {
   role_based_access_control_enabled = true
 
   azure_active_directory_role_based_access_control {
-    managed            = true
-    azure_rbac_enabled = true
+    tenant_id              = data.azurerm_client_config.current.tenant_id
+    admin_group_object_ids = var.admin_group_object_ids
+    azure_rbac_enabled     = true
   }
 
   key_vault_secrets_provider {
@@ -99,3 +104,6 @@ resource "azurerm_kubernetes_cluster" "this" {
     ]
   }
 }
+
+# Tenant of the identity running Terraform, used for Entra ID integration
+data "azurerm_client_config" "current" {}

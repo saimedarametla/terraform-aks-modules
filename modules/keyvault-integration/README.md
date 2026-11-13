@@ -7,14 +7,14 @@ Key Vault with soft delete, purge protection and default-deny network rules, plu
 
 | Name | Version |
 |------|---------|
-| terraform | >= 1.3 |
-| azurerm | ~> 3.100 |
+| terraform | >= 1.7 |
+| azurerm | ~> 5.13 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| azurerm | ~> 3.100 |
+| azurerm | ~> 5.13 |
 
 ## Modules
 

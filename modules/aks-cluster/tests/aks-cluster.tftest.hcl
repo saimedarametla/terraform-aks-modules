@@ -21,6 +21,13 @@ mock_provider "azurerm" {
       ]
     }
   }
+
+  # AKS requires a UUID tenant ID; the mock would otherwise return a random string.
+  mock_data "azurerm_client_config" {
+    defaults = {
+      tenant_id = "11111111-1111-1111-1111-111111111111"
+    }
+  }
 }
 
 variables {
@@ -67,7 +74,7 @@ run "system_pool_runs_only_critical_addons" {
   }
 
   assert {
-    condition     = azurerm_kubernetes_cluster.this.default_node_pool[0].enable_auto_scaling == true
+    condition     = azurerm_kubernetes_cluster.this.default_node_pool[0].auto_scaling_enabled == true
     error_message = "The system pool must autoscale"
   }
 }
@@ -134,8 +141,8 @@ run "rejects_unknown_upgrade_channel" {
   command = plan
 
   variables {
-    automatic_channel_upgrade = "weekly"
+    automatic_upgrade_channel = "weekly"
   }
 
-  expect_failures = [var.automatic_channel_upgrade]
+  expect_failures = [var.automatic_upgrade_channel]
 }

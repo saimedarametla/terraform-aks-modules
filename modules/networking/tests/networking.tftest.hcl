@@ -23,7 +23,7 @@ run "subnet_has_key_vault_service_endpoint" {
   command = plan
 
   assert {
-    condition     = contains(azurerm_subnet.aks.service_endpoints, "Microsoft.KeyVault")
+    condition     = contains(azurerm_subnet.aks.service_endpoint[*].service, "Microsoft.KeyVault")
     error_message = "The AKS subnet needs the Microsoft.KeyVault service endpoint for the vault network rules"
   }
 }

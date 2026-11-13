@@ -7,14 +7,14 @@ Autoscaling user node pool with taints, labels, availability zones and ephemeral
 
 | Name | Version |
 |------|---------|
-| terraform | >= 1.3 |
-| azurerm | ~> 3.100 |
+| terraform | >= 1.7 |
+| azurerm | ~> 5.13 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| azurerm | ~> 3.100 |
+| azurerm | ~> 5.13 |
 
 ## Modules
 

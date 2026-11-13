@@ -1,9 +1,9 @@
 terraform {
-  required_version = ">= 1.3"
+  required_version = ">= 1.7"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.100"
+      version = "~> 5.13"
     }
   }
 }
@@ -18,6 +18,7 @@ resource "azurerm_key_vault" "this" {
   sku_name                   = "standard"
   soft_delete_retention_days = 7
   purge_protection_enabled   = true
+  rbac_authorization_enabled = false # this module grants access with access policies
 
   network_acls {
     default_action             = "Deny"
