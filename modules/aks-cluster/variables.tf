@@ -85,3 +85,9 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "admin_group_object_ids" {
+  description = "Object IDs of Entra ID groups given cluster admin access. Local accounts are disabled, so set this to manage the cluster with kubectl."
+  type        = list(string)
+  default     = []
+}

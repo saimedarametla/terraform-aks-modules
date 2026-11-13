@@ -25,6 +25,7 @@ No modules.
 | Name | Type |
 |------|------|
 | [azurerm_kubernetes_cluster.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/kubernetes_cluster) | resource |
+| [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/client_config) | data source |
 
 ## Inputs
 
@@ -33,6 +34,7 @@ No modules.
 | cluster\_name | Name of the AKS cluster | `string` | n/a | yes |
 | resource\_group\_name | Resource group to deploy the cluster into | `string` | n/a | yes |
 | subnet\_id | Subnet resource ID for AKS node placement (Azure CNI) | `string` | n/a | yes |
+| admin\_group\_object\_ids | Object IDs of Entra ID groups given cluster admin access. Local accounts are disabled, so set this to manage the cluster with kubectl. | `list(string)` | `[]` | no |
 | api\_server\_authorized\_ip\_ranges | CIDR ranges allowed to reach the public API server. Empty means unrestricted. Not supported together with private\_cluster\_enabled. | `list(string)` | `[]` | no |
 | automatic\_upgrade\_channel | Automatic upgrade channel: patch, rapid, stable or node-image. Null leaves upgrades to your own pipeline. With patch, set kubernetes\_version to a minor version such as 1.30. | `string` | `null` | no |
 | default\_node\_pool | Configuration for the system (default) node pool | ```object({ vm_size = string node_count = number min_count = number max_count = number availability_zones = optional(list(string), ["1", "2", "3"]) })``` | ```{ "max_count": 5, "min_count": 2, "node_count": 3, "vm_size": "Standard_D4s_v3" }``` | no |
