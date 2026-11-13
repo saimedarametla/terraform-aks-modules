@@ -21,6 +21,13 @@ mock_provider "azurerm" {
       ]
     }
   }
+
+  # AKS requires a UUID tenant ID; the mock would otherwise return a random string.
+  mock_data "azurerm_client_config" {
+    defaults = {
+      tenant_id = "11111111-1111-1111-1111-111111111111"
+    }
+  }
 }
 
 variables {
