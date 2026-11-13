@@ -58,13 +58,13 @@ variable "sku_tier" {
   }
 }
 
-variable "automatic_channel_upgrade" {
+variable "automatic_upgrade_channel" {
   description = "Automatic upgrade channel: patch, rapid, stable or node-image. Null leaves upgrades to your own pipeline. With patch, set kubernetes_version to a minor version such as 1.30."
   type        = string
   default     = null
   validation {
-    condition     = var.automatic_channel_upgrade == null || contains(["patch", "rapid", "stable", "node-image"], coalesce(var.automatic_channel_upgrade, "none"))
-    error_message = "automatic_channel_upgrade must be null, patch, rapid, stable or node-image."
+    condition     = var.automatic_upgrade_channel == null || contains(["patch", "rapid", "stable", "node-image"], coalesce(var.automatic_upgrade_channel, "none"))
+    error_message = "automatic_upgrade_channel must be null, patch, rapid, stable or node-image."
   }
 }
 

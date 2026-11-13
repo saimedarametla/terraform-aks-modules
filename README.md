@@ -1,7 +1,7 @@
 # terraform-aks-modules
 
 [![Terraform Validate](https://github.com/saimedarametla/terraform-aks-modules/actions/workflows/terraform-validate.yml/badge.svg)](https://github.com/saimedarametla/terraform-aks-modules/actions/workflows/terraform-validate.yml)
-![Terraform](https://img.shields.io/badge/Terraform-%3E%3D1.3-7B42BC?logo=terraform)
+![Terraform](https://img.shields.io/badge/Terraform-%3E%3D1.7-7B42BC?logo=terraform)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 Reusable Terraform modules for production-grade Azure Kubernetes Service (AKS) deployments.
@@ -50,13 +50,13 @@ flowchart LR
 
 ```hcl
 module "networking" {
-  source              = "github.com/saimedarametla/terraform-aks-modules//modules/networking?ref=v2.0.0"
+  source              = "github.com/saimedarametla/terraform-aks-modules//modules/networking?ref=v3.0.0"
   cluster_name        = "aks-prod-001"
   resource_group_name = "rg-aks-prod"
 }
 
 module "aks_cluster" {
-  source              = "github.com/saimedarametla/terraform-aks-modules//modules/aks-cluster?ref=v2.0.0"
+  source              = "github.com/saimedarametla/terraform-aks-modules//modules/aks-cluster?ref=v3.0.0"
   cluster_name        = "aks-prod-001"
   resource_group_name = "rg-aks-prod"
   subnet_id           = module.networking.aks_subnet_id
@@ -67,7 +67,7 @@ module "aks_cluster" {
 }
 
 module "app_pool" {
-  source                = "github.com/saimedarametla/terraform-aks-modules//modules/node-pool?ref=v2.0.0"
+  source                = "github.com/saimedarametla/terraform-aks-modules//modules/node-pool?ref=v3.0.0"
   node_pool_name        = "apppool"
   kubernetes_cluster_id = module.aks_cluster.cluster_id
   subnet_id             = module.networking.aks_subnet_id
@@ -93,14 +93,14 @@ terraform plan -var-file=dev.tfvars
 
 | Name | Version |
 |---|---|
-| Terraform | >= 1.3 |
-| azurerm provider | ~> 3.100 |
+| Terraform | >= 1.7 |
+| azurerm provider | ~> 5.13 |
 
 ## Inputs and outputs
 
 Complete, generated tables are in each module's README ([`networking`](modules/networking/README.md), [`aks-cluster`](modules/aks-cluster/README.md), [`node-pool`](modules/node-pool/README.md), [`keyvault-integration`](modules/keyvault-integration/README.md)). The key ones:
 
-**aks-cluster:** `cluster_name`, `resource_group_name`, `subnet_id` (required); `location`, `kubernetes_version`, `sku_tier` (default `Standard`), `private_cluster_enabled`, `api_server_authorized_ip_ranges`, `automatic_channel_upgrade`, `default_node_pool`, `log_analytics_workspace_id`, `tags` (optional).
+**aks-cluster:** `cluster_name`, `resource_group_name`, `subnet_id` (required); `location`, `kubernetes_version`, `sku_tier` (default `Standard`), `private_cluster_enabled`, `api_server_authorized_ip_ranges`, `automatic_upgrade_channel`, `default_node_pool`, `log_analytics_workspace_id`, `tags` (optional).
 Outputs: `cluster_id`, `cluster_name`, `kube_config` (sensitive), `kubelet_identity_object_id`, `cluster_identity_principal_id`, `node_resource_group`.
 
 **networking:** `cluster_name`, `resource_group_name` (required); `vnet_address_space`, `aks_subnet_prefix`. Outputs: `vnet_id`, `aks_subnet_id`.

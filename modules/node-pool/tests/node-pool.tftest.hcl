@@ -15,7 +15,7 @@ run "user_pool_defaults" {
   }
 
   assert {
-    condition     = azurerm_kubernetes_cluster_node_pool.this.enable_auto_scaling == true
+    condition     = azurerm_kubernetes_cluster_node_pool.this.auto_scaling_enabled == true
     error_message = "Pools must autoscale"
   }
 
